@@ -4,20 +4,26 @@ import requests
 import operator
 import time
 import datetime
+import json
 
 app = Flask(__name__)
 #python receiveDataServerTest.py
 @app.route("/")
 def CSVtoServer():
 	url = 'https://sigma-myth-229819.appspot.com/truckapi'
+	driverUrl = 'https://sigma-myth-229819.appspot.com/driverApi'
+	headers = { 'Content-Type': 'application/json' }
+
 	with open('ITM_20190121.csv') as csv_file:
 		csv_read = csv.reader(csv_file, delimiter=',')
 		sortedCSV = sorted(csv_read, key=operator.itemgetter(7))
 		
 		for i in range(len(sortedCSV)):
 			if sortedCSV[i][9] != 'NULL' and sortedCSV[i][8] != 'NULL' and sortedCSV[i][1] != 'NULL':
+				driverDict = {"driverID": "12345", "lon": float(sortedCSV[i][9]), "lat": float(sortedCSV[i][8]) }
 				tempDict = {"Longitude": float(sortedCSV[i][9]), "Latitude": float(sortedCSV[i][8]), "DeviceSerial": int(sortedCSV[i][1]), "MessageType": sortedCSV[i][3], "ReportType":sortedCSV[i][4]}
-				response = requests.post(url, tempDict)
+				response = requests.post(url, headers=headers, data=json.dumps(tempDict))
+				driverResponse = requests.post(driverUrl, headers=headers, data=json.dumps(driverDict))
 				print(tempDict, response)				
 				if(i + 1 != len(sortedCSV)):
 			
