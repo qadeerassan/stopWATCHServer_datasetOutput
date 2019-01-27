@@ -17,14 +17,19 @@ def CSVtoServer():
 	with open('ITM_20190121.csv') as csv_file:
 		csv_read = csv.reader(csv_file, delimiter=',')
 		sortedCSV = sorted(csv_read, key=operator.itemgetter(7))
-		
+		counter = 0;
+
 		for i in range(len(sortedCSV)):
 			if sortedCSV[i][9] != 'NULL' and sortedCSV[i][8] != 'NULL' and sortedCSV[i][1] != 'NULL':
 				driverDict = {"driverID": "12345", "lon": float(sortedCSV[i][9]), "lat": float(sortedCSV[i][8]) }
 				tempDict = {"Longitude": float(sortedCSV[i][9]), "Latitude": float(sortedCSV[i][8]), "DeviceSerial": int(sortedCSV[i][1]), "MessageType": sortedCSV[i][3], "ReportType":sortedCSV[i][4]}
 				response = requests.post(url, headers=headers, data=json.dumps(tempDict))
-				driverResponse = requests.post(driverUrl, headers=headers, data=json.dumps(driverDict))
-				print(tempDict, response)				
+				if int(sortedCSV[i][1]) == 1084067241 and counter < 59:
+					driverResponse = requests.post(driverUrl, headers=headers, data=json.dumps(driverDict))
+				print(driverDict, driverResponse)
+				print(tempDict, response)
+				counter += 1;
+				print(counter)			
 				if(i + 1 != len(sortedCSV)):
 			
 					newStr = sortedCSV[i][7]
@@ -34,7 +39,7 @@ def CSVtoServer():
 					ftr = [3600,60,1]
 					x = sum([a*b for a,b in zip(ftr, map(int,newStr.split(':')))])
 					x2 = sum([a*b for a,b in zip(ftr, map(int,newStr2.split(':')))])
-					tempDiff = (x2-x) / 10
+					tempDiff = (x2-x) / 100
 					print(tempDiff)
 					time.sleep(tempDiff)
 
